@@ -1,51 +1,100 @@
-# gudlift-registration
+[![oc-project-shield][oc-project-shield]][oc-project-url]
 
-1. Why
+[oc-project-shield]: https://img.shields.io/badge/OPENCLASSROOMS-PROJECT-blueviolet?style=for-the-badge
+[oc-project-url]: https://openclassrooms.com/fr/paths/518-developpeur-dapplication-python
 
+# Openclassrooms - Développeur d'application Python - Projet 11
 
-    This is a proof of concept (POC) project to show a light-weight version of our competition booking platform. The aim is the keep things as light as possible, and use feedback from the users to iterate.
+Améliorez une application Web Python par des tests et du débogage
 
-2. Getting Started
+![GÜDLFT](https://user.oc-static.com/upload/2020/09/22/16007798203635_P9.png)
 
-    This project uses the following technologies:
+## Compétences évaluées
 
-    * Python v3.x+
+- :bulb: Implémentez une suite de tests Python
+- :bulb: Debugger le code d'une application Python
+- :bulb: Gérer les erreurs et les exceptions en Python
 
-    * [Flask](https://flask.palletsprojects.com/en/1.1.x/)
+## Installation et exécution du projet
 
-        Whereas Django does a lot of things for us out of the box, Flask allows us to add only what we need. 
-     
+### Pré-requis
 
-    * [Virtual environment](https://virtualenv.pypa.io/en/stable/installation.html)
+- Avoir `Python`, `pip` et `pipenv` installé sur sa machine.
 
-        This ensures you'll be able to install the correct packages without interfering with Python on your machine.
+1. Cloner le repo
 
-        Before you begin, please ensure you have this installed globally. 
+```sh
+git clone https://github.com/Gregson971/oc-da-python-p11.git
+```
 
+2. Se placer dans le dossier oc-da-python-p11
 
-3. Installation
+```sh
+cd /oc-da-python-p11/
+```
 
-    - After cloning, change into the directory and type <code>virtualenv .</code>. This will then set up a a virtual python environment within that directory.
+3. Créer l'environnement virtuel
 
-    - Next, type <code>source bin/activate</code>. You should see that your command prompt has changed to the name of the folder. This means that you can install packages in here without affecting affecting files outside. To deactivate, type <code>deactivate</code>
+```sh
+python -m venv env
+```
 
-    - Rather than hunting around for the packages you need, you can install in one step. Type <code>pip install -r requirements.txt</code>. This will install all the packages listed in the respective file. If you install a package, make sure others know by updating the requirements.txt file. An easy way to do this is <code>pip freeze > requirements.txt</code>
+4. Activer l'environnement virtuel \
+   Si vous utilisez Mac ou Linux
 
-    - Flask requires that you set an environmental variable to the python file. However you do that, you'll want to set the file to be <code>server.py</code>. Check [here](https://flask.palletsprojects.com/en/1.1.x/quickstart/#a-minimal-application) for more details
+```sh
+source env/bin/activate
+```
 
-    - You should now be ready to test the application. In the directory, type either <code>flask run</code> or <code>python -m flask run</code>. The app should respond with an address you should be able to go to using your browser.
+Si vous utilisez Windows
 
-4. Current Setup
+```sh
+env\Scripts\activate.bat
+```
 
-    The app is powered by [JSON files](https://www.tutorialspoint.com/json/json_quick_guide.htm). This is to get around having a DB until we actually need one. The main ones are:
-     
-    * competitions.json - list of competitions
-    * clubs.json - list of clubs with relevant information. You can look here to see what email addresses the app will accept for login.
+5. Installer les packages requis
 
-5. Testing
+```sh
+pip install -r requirements.txt
+```
 
-    You are free to use whatever testing framework you like-the main thing is that you can show what tests you are using.
+6. Lancer le serveur Flask
 
-    We also like to show how well we're testing, so there's a module called 
-    [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
+```sh
+export FLASK_APP=server.py
+flask run
+```
 
+Pour accéder au site, se rendre sur l'adresse par défaut : http://127.0.0.1:5000/
+
+## Tests
+
+### Tests unitaires / tests d'intégration
+
+Les tests unitaires et d'intégration sont exécutés grâce à Pytest (version 8.0.1).
+
+Pour effectuer l'ensemble des tests unitaires et d'intégration, entrer la commande :
+
+```sh
+pytest -v
+```
+
+### Tests de performance
+
+Les tests de performance sont exécutés grâce à Locust (version 2.23.1).
+
+Pour effectuer les tests de performance, entrer la commande :
+
+```sh
+locust -f tests/performance_tests/locustfile.py
+```
+
+Puis se rendre sur l'adresse par défaut : http://0.0.0.0:8089 pour configurer les tests.
+
+### Couverture de code
+
+Pour obtenir un rapport de couverture de code, entrer la commande :
+
+```sh
+pytest --cov=. --cov-report html
+```
