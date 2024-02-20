@@ -14,11 +14,30 @@ def loadCompetitions():
         return listOfCompetitions
 
 
+def loadBookedPlaces(competitions, clubs):
+    booked_places = []
+    for competition in competitions:
+        for club in clubs:
+            booked_places.append({"competition": competition["name"], "club": club["name"], "places": 0})
+    return booked_places
+
+
+def update_booked_places(competition, club, places_required):
+    for place in booked_places:
+        if place['competition'] == competition and place['club'] == club:
+            if place['places'] + places_required <= 12:
+                place['places'] += places_required
+                break
+            else:
+                raise ValueError('Sorry, you cannot purchase more than 12 places')
+
+
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
 competitions = loadCompetitions()
 clubs = loadClubs()
+booked_places = loadBookedPlaces(competitions, clubs)
 
 
 @app.route('/')
@@ -47,10 +66,24 @@ def book(competition, club):
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-    flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+    places_required = int(request.form['places'])
+
+    if int(club['points']) < places_required:
+        flash('You do not have enough points')
+        return render_template('booking.html', club=club, competition=competition), 400
+    elif places_required > 12:
+        flash('Sorry, you cannot purchase more than 12 places')
+        return render_template('booking.html', club=club, competition=competition), 400
+    else:
+        try:
+            update_booked_places(competition['name'], club['name'], places_required)
+            club['points'] = int(club['points']) - places_required
+            competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
+            flash('Great-booking complete!')
+            return render_template('welcome.html', club=club, competitions=competitions)
+        except ValueError as e:
+            flash(e)
+            return render_template('booking.html', club=club, competition=competition), 400
 
 
 # TODO: Add route for points display
