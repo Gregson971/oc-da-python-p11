@@ -1,5 +1,7 @@
 import json
 from flask import Flask, render_template, request, redirect, flash, url_for
+from datetime import datetime
+from dateutil.parser import parse as parse_date
 
 
 def loadClubs():
@@ -32,12 +34,26 @@ def update_booked_places(competition, club, places_required):
                 raise ValueError('Sorry, you cannot purchase more than 12 places')
 
 
+def sort_competitions_date(comps):
+    past = []
+    present = []
+
+    for comp in comps:
+        if parse_date(comp['date']) < datetime.now():
+            past.append(comp)
+        elif parse_date(comp['date']) >= datetime.now():
+            present.append(comp)
+
+    return past, present
+
+
 app = Flask(__name__)
 app.secret_key = "something_special"
 
 competitions = loadCompetitions()
 clubs = loadClubs()
 booked_places = loadBookedPlaces(competitions, clubs)
+past_competitions, present_competitions = sort_competitions_date(competitions)
 
 
 @app.route("/")
@@ -49,7 +65,9 @@ def index():
 def showSummary():
     try:
         club = [club for club in clubs if club["email"] == request.form["email"]][0]
-        return render_template("welcome.html", club=club, competitions=competitions)
+        return render_template(
+            'welcome.html', club=club, past_competitions=past_competitions, present_competitions=present_competitions
+        )
     except IndexError:
         if request.form["email"] == "":
             flash("Please enter your email address")
@@ -60,13 +78,32 @@ def showSummary():
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
-    foundClub = [c for c in clubs if c["name"] == club][0]
-    foundCompetition = [c for c in competitions if c["name"] == competition][0]
-    if foundClub and foundCompetition:
-        return render_template("booking.html", club=foundClub, competition=foundCompetition)
+    found_club = [c for c in clubs if c['name'] == club][0]
+    found_competition = [c for c in competitions if c['name'] == competition][0]
+    if found_club and found_competition:
+        if parse_date(found_competition['date']) < datetime.now():
+            flash("This competition is over.", 'error')
+            return (
+                render_template(
+                    'welcome.html',
+                    club=club,
+                    past_competitions=past_competitions,
+                    present_competitions=present_competitions,
+                ),
+                403,
+            )
+        return render_template('booking.html', club=found_club, competition=found_competition)
     else:
-        flash("Something went wrong-please try again")
-        return render_template("welcome.html", club=club, competitions=competitions)
+        flash("Something went wrong-please try again", 'error')
+        return (
+            render_template(
+                'welcome.html',
+                club=club,
+                past_competitions=past_competitions,
+                present_competitions=present_competitions,
+            ),
+            403,
+        )
 
 
 @app.route("/purchasePlaces", methods=["POST"])
@@ -86,10 +123,15 @@ def purchasePlaces():
             update_booked_places(competition['name'], club['name'], places_required)
             club['points'] = int(club['points']) - places_required
             competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
-            flash('Great-booking complete!')
-            return render_template('welcome.html', club=club, competitions=competitions)
+            flash('Great-booking complete!', 'success')
+            return render_template(
+                'welcome.html',
+                club=club,
+                past_competitions=past_competitions,
+                present_competitions=present_competitions,
+            )
         except ValueError as e:
-            flash(e)
+            flash(e, 'error')
             return render_template('booking.html', club=club, competition=competition), 400
 
 
