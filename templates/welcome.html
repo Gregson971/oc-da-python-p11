@@ -3,21 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}" />
     <title>Summary | GUDLFT Registration</title>
 </head>
 
 <body>
     <h2>Welcome, {{club['email']}} </h2><a href="{{url_for('logout')}}">Logout</a>
 
-    {% with messages = get_flashed_messages()%}
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li>{{message}}</li>
-        {% endfor %}
-    </ul>
-    {% endif%}
     Points available: {{club['points']}}
+
     <h3>Competitions:</h3>
     <ul>
         {% for comp in competitions%}
@@ -32,8 +26,8 @@
         <hr />
         {% endfor %}
     </ul>
-    {%endwith%}
 
+    {% include 'messages.html' %}
 </body>
 
 </html>
