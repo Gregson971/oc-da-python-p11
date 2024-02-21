@@ -77,3 +77,12 @@ class TestPurchasePlaces:
         assert response.status_code == 400
         assert data.find(b"Sorry, you cannot purchase more than 12 places") != -1
         assert self.booked_places[0]["places"] == 0
+
+    def test_should_deduct_club_points(self, client):
+        places_booked = 5
+        response = client.post(
+            '/purchasePlaces',
+            data=dict(competition=self.competitions[0]["name"], club=self.clubs[0]["name"], places=places_booked),
+        )
+        assert response.status_code == 200
+        assert self.clubs[0]["points"] == 10
