@@ -70,7 +70,7 @@ def showSummary():
         )
     except IndexError:
         if request.form["email"] == "":
-            flash("Please enter your email address")
+            flash("Please enter your email address", "error")
         else:
             flash("The email address you entered does not exist")
         return render_template("index.html"), 401
@@ -82,7 +82,7 @@ def book(competition, club):
     found_competition = [c for c in competitions if c['name'] == competition][0]
     if found_club and found_competition:
         if parse_date(found_competition['date']) < datetime.now():
-            flash("This competition is over.", 'error')
+            flash("This competition is over.", "error")
             return (
                 render_template(
                     'welcome.html',
@@ -94,7 +94,7 @@ def book(competition, club):
             )
         return render_template('booking.html', club=found_club, competition=found_competition)
     else:
-        flash("Something went wrong-please try again", 'error')
+        flash("Something went wrong-please try again", "error")
         return (
             render_template(
                 'welcome.html',
@@ -113,10 +113,10 @@ def purchasePlaces():
     places_required = int(request.form['places'])
 
     if int(club['points']) < places_required:
-        flash('You do not have enough points')
+        flash('You do not have enough points', 'error')
         return render_template('booking.html', club=club, competition=competition), 400
     elif places_required > 12:
-        flash('Sorry, you cannot purchase more than 12 places')
+        flash('Sorry, you cannot purchase more than 12 places', 'error')
         return render_template('booking.html', club=club, competition=competition), 400
     else:
         try:
@@ -135,7 +135,10 @@ def purchasePlaces():
             return render_template('booking.html', club=club, competition=competition), 400
 
 
-# TODO: Add route for points display
+@app.route('/dashboard')
+def view_clubs():
+    club_list = sorted(clubs, key=lambda club: club['name'])
+    return render_template('dashboard.html', clubs=club_list)
 
 
 @app.route("/logout")
