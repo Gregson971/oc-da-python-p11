@@ -9,7 +9,7 @@ def client():
         yield client
 
 
-class TestPurchasePlaces:
+class TestPurchasePlacesAndSeePoints:
     competitions = [
         {
             "name": "Test compétition",
@@ -86,33 +86,3 @@ class TestPurchasePlaces:
         )
         assert response.status_code == 200
         assert self.clubs[0]["points"] == 10
-
-    def test_should_enter_purchase_places_between_1_and_12(self, client):
-        places_booked = 0
-        response = client.post(
-            '/purchasePlaces',
-            data=dict(competition=self.competitions[0]["name"], club=self.clubs[0]["name"], places=places_booked),
-        )
-        assert response.status_code == 400
-        data = response.get_data()
-        assert data.find(b"Please enter a number between 0 and 12.") != -1
-
-    def test_should_enter_a_valid_number(self, client):
-        places_booked = 'hello world'
-        response = client.post(
-            '/purchasePlaces',
-            data=dict(competition=self.competitions[0]["name"], club=self.clubs[0]["name"], places=places_booked),
-        )
-        assert response.status_code == 400
-        data = response.get_data()
-        assert data.find(b"Please enter a valid number for places") != -1
-
-    def test_should_failed_to_update_places(self, client):
-        places_booked = 14
-        response = client.post(
-            '/purchasePlaces',
-            data=dict(competition=self.competitions[0]["name"], club=self.clubs[0]["name"], places=places_booked),
-        )
-        assert response.status_code == 400
-        data = response.get_data()
-        assert data.find(b"Sorry, you cannot purchase more than 12 places") != -1

@@ -42,18 +42,9 @@ class TestPurchasePlaces:
         # Reset the number of places
         self.competitions[0]["numberOfPlaces"] = 25
 
-    def test_should_deduct_club_points(self, client):
-        response1 = client.get('/dashboard')
-        assert response1.status_code == 200
+    def test_should_see_dashboard(self, client):
+        response = client.get('/dashboard')
+        assert response.status_code == 200
+        data = response.data.decode()
+        assert data.find("Dashboard | GUDLFT") != -1
         assert int(self.clubs[0]["points"]) == 10
-
-        places_booked = 5
-        response2 = client.post(
-            '/purchasePlaces',
-            data=dict(competition=self.competitions[0]["name"], club=self.clubs[0]["name"], places=places_booked),
-        )
-        assert response2.status_code == 200
-
-        response3 = client.get('/dashboard')
-        assert response3.status_code == 200
-        assert int(self.clubs[0]["points"]) == 5

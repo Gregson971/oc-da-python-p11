@@ -46,3 +46,15 @@ class TestBookPlaces:
         assert response.status_code == 200
         data = response.data.decode()
         assert data.find("Booking for Test compétition || GUDLFT") != -1
+
+    def test_book_non_existant_competition(self, client):
+        response = client.get("/book/random_name/Test club")
+        assert response.status_code == 404
+        data = response.data.decode()
+        assert data.find("Something went wrong-please try again") != -1
+
+    def test_book_non_existant_club(self, client):
+        response = client.get("/book/Test compétition/random_name")
+        assert response.status_code == 404
+        data = response.data.decode()
+        assert data.find("Something went wrong-please try again") != -1

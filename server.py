@@ -78,22 +78,25 @@ def showSummary():
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
-    found_club = [c for c in clubs if c['name'] == club][0]
-    found_competition = [c for c in competitions if c['name'] == competition][0]
-    if found_club and found_competition:
-        if parse_date(found_competition['date']) < datetime.now():
-            flash("This competition is over.", "error")
-            return (
-                render_template(
-                    'welcome.html',
-                    club=club,
-                    past_competitions=past_competitions,
-                    present_competitions=present_competitions,
-                ),
-                403,
-            )
-        return render_template('booking.html', club=found_club, competition=found_competition)
-    else:
+    try:
+        found_club = [c for c in clubs if c['name'] == club][0]
+        found_competition = [c for c in competitions if c['name'] == competition][0]
+
+        if found_club and found_competition:
+            if parse_date(found_competition['date']) < datetime.now():
+                flash("This competition is over.", "error")
+                return (
+                    render_template(
+                        'welcome.html',
+                        club=club,
+                        past_competitions=past_competitions,
+                        present_competitions=present_competitions,
+                    ),
+                    403,
+                )
+            return render_template('booking.html', club=found_club, competition=found_competition)
+
+    except IndexError:
         flash("Something went wrong-please try again", "error")
         return (
             render_template(
@@ -102,7 +105,7 @@ def book(competition, club):
                 past_competitions=past_competitions,
                 present_competitions=present_competitions,
             ),
-            403,
+            404,
         )
 
 
@@ -110,7 +113,12 @@ def book(competition, club):
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
-    places_required = int(request.form['places'])
+
+    try:
+        places_required = int(request.form['places'])
+    except ValueError:
+        flash('Please enter a valid number for places.', 'error')
+        return render_template('booking.html', club=club, competition=competition), 400
 
     if int(club['points']) < places_required:
         flash('You do not have enough points', 'error')
@@ -118,21 +126,20 @@ def purchasePlaces():
     elif places_required > 12:
         flash('Sorry, you cannot purchase more than 12 places', 'error')
         return render_template('booking.html', club=club, competition=competition), 400
+    elif places_required < 1:
+        flash('Please enter a number between 0 and 12.', 'error')
+        return render_template('booking.html', club=club, competition=competition), 400
     else:
-        try:
-            update_booked_places(competition['name'], club['name'], places_required)
-            club['points'] = int(club['points']) - places_required
-            competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
-            flash('Great-booking complete!', 'success')
-            return render_template(
-                'welcome.html',
-                club=club,
-                past_competitions=past_competitions,
-                present_competitions=present_competitions,
-            )
-        except ValueError as e:
-            flash(e, 'error')
-            return render_template('booking.html', club=club, competition=competition), 400
+        update_booked_places(competition['name'], club['name'], places_required)
+        club['points'] = int(club['points']) - places_required
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
+        flash('Great-booking complete!', 'success')
+        return render_template(
+            'welcome.html',
+            club=club,
+            past_competitions=past_competitions,
+            present_competitions=present_competitions,
+        )
 
 
 @app.route('/dashboard')
