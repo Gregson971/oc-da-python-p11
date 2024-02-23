@@ -14,6 +14,11 @@
             "name": "Summer Showdown",
             "date": "2024-07-15 09:00:00",
             "numberOfPlaces": "20"
+        },
+        {
+            "name": "Locust Competition",
+            "date": "2025-07-15 09:00:00",
+            "numberOfPlaces": "80"
         }
     ]
 }
