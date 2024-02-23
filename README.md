@@ -98,3 +98,9 @@ Pour obtenir un rapport de couverture de code, entrer la commande :
 ```sh
 pytest --cov=. --cov-report html
 ```
+
+## Rapports
+
+- [Rapport de tests](https://github.com/Gregson971/oc-da-python-p11/blob/QA/reports/tests_report.png)
+- [Rapport de couverture de code](https://github.com/Gregson971/oc-da-python-p11/blob/QA/reports/coverage_report.png)
+- [Rapport de performance](https://github.com/Gregson971/oc-da-python-p11/blob/QA/reports/performance_report.png)
