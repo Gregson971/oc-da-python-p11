@@ -49,7 +49,7 @@ def book(competition, club):
                         past_competitions=past_competitions,
                         present_competitions=present_competitions,
                     ),
-                    403,
+                    400,
                 )
             return render_template('booking.html', club=found_club, competition=found_competition)
 

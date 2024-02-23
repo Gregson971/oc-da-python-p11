@@ -37,7 +37,7 @@ class TestBookPlaces:
 
     def test_should_not_book_places_in_past_competition(self, client):
         response = client.get("/book/Test 2 compétition/Test club")
-        assert response.status_code == 403
+        assert response.status_code == 400
         data = response.data.decode()
         assert data.find("This competition is over.") != -1
 
