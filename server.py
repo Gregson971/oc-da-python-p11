@@ -1,50 +1,7 @@
-import json
 from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime
 from dateutil.parser import parse as parse_date
-
-
-def loadClubs():
-    with open("clubs.json") as c:
-        listOfClubs = json.load(c)["clubs"]
-        return listOfClubs
-
-
-def loadCompetitions():
-    with open("competitions.json") as comps:
-        listOfCompetitions = json.load(comps)["competitions"]
-        return listOfCompetitions
-
-
-def loadBookedPlaces(competitions, clubs):
-    booked_places = []
-    for competition in competitions:
-        for club in clubs:
-            booked_places.append({"competition": competition["name"], "club": club["name"], "places": 0})
-    return booked_places
-
-
-def update_booked_places(competition, club, places_required):
-    for place in booked_places:
-        if place['competition'] == competition and place['club'] == club:
-            if place['places'] + places_required <= 12:
-                place['places'] += places_required
-                break
-            else:
-                raise ValueError('Sorry, you cannot purchase more than 12 places')
-
-
-def sort_competitions_date(comps):
-    past = []
-    present = []
-
-    for comp in comps:
-        if parse_date(comp['date']) < datetime.now():
-            past.append(comp)
-        elif parse_date(comp['date']) >= datetime.now():
-            present.append(comp)
-
-    return past, present
+from helpers import loadClubs, loadCompetitions, loadBookedPlaces, update_booked_places, sort_competitions_date
 
 
 app = Flask(__name__)
@@ -130,7 +87,7 @@ def purchasePlaces():
         flash('Please enter a number between 0 and 12.', 'error')
         return render_template('booking.html', club=club, competition=competition), 400
     else:
-        update_booked_places(competition['name'], club['name'], places_required)
+        update_booked_places(competition['name'], club['name'], booked_places, places_required)
         club['points'] = int(club['points']) - places_required
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
         flash('Great-booking complete!', 'success')

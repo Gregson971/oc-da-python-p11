@@ -21,7 +21,7 @@ class TestUpdateBookedPlaces:
         club = 'Club1'
         places_required = 3
 
-        server.update_booked_places(competition, club, places_required)
+        server.update_booked_places(competition, club, self.booked_places, places_required)
 
         assert self.booked_places[0]['places'] == 9
 
@@ -31,7 +31,7 @@ class TestUpdateBookedPlaces:
         places_required = 14
 
         with pytest.raises(ValueError) as e:
-            server.update_booked_places(competition, club, places_required)
+            server.update_booked_places(competition, club, self.booked_places, places_required)
 
         assert str(e.value) == 'Sorry, you cannot purchase more than 12 places'
         assert self.booked_places[0]['places'] == 6
