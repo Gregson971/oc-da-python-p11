@@ -44,3 +44,10 @@ def sort_competitions_date(comps):
             present.append(comp)
 
     return past, present
+
+
+def get_max_places_available(competition):
+    if int(competition['numberOfPlaces']) > 12:
+        return 12
+    else:
+        return competition['numberOfPlaces']

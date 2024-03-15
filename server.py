@@ -1,7 +1,14 @@
 from flask import Flask, render_template, request, redirect, flash, url_for
 from datetime import datetime
 from dateutil.parser import parse as parse_date
-from helpers import loadClubs, loadCompetitions, loadBookedPlaces, update_booked_places, sort_competitions_date
+from helpers import (
+    loadClubs,
+    loadCompetitions,
+    loadBookedPlaces,
+    update_booked_places,
+    sort_competitions_date,
+    get_max_places_available,
+)
 
 
 app = Flask(__name__)
@@ -38,6 +45,7 @@ def book(competition, club):
     try:
         found_club = [c for c in clubs if c['name'] == club][0]
         found_competition = [c for c in competitions if c['name'] == competition][0]
+        max_places_available = get_max_places_available(found_competition)
 
         if found_club and found_competition:
             if parse_date(found_competition['date']) < datetime.now():
@@ -51,7 +59,12 @@ def book(competition, club):
                     ),
                     400,
                 )
-            return render_template('booking.html', club=found_club, competition=found_competition)
+            return render_template(
+                'booking.html',
+                club=found_club,
+                competition=found_competition,
+                max_places_available=max_places_available,
+            )
 
     except IndexError:
         flash("Something went wrong-please try again", "error")
@@ -71,23 +84,33 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
 
+    max_places_available = get_max_places_available(competition)
+
     try:
         places_required = int(request.form['places'])
     except ValueError:
-        flash('Please enter a valid number for places.', 'error')
+        if request.form['places'] == "":
+            flash('Please enter a number for places.', 'error')
+        else:
+            flash('Please enter a valid number for places.', 'error')
         return render_template('booking.html', club=club, competition=competition), 400
 
     if int(club['points']) < places_required:
         flash('You do not have enough points', 'error')
         return render_template('booking.html', club=club, competition=competition), 400
-    elif places_required > 12:
-        flash('Sorry, you cannot purchase more than 12 places', 'error')
+    elif places_required > max_places_available:
+        flash('Sorry, you cannot purchase more than {} places'.format(max_places_available), 'error')
         return render_template('booking.html', club=club, competition=competition), 400
     elif places_required < 1:
         flash('Please enter a number between 0 and 12.', 'error')
         return render_template('booking.html', club=club, competition=competition), 400
     else:
-        update_booked_places(competition['name'], club['name'], booked_places, places_required)
+        try:
+            update_booked_places(competition['name'], club['name'], booked_places, places_required)
+        except ValueError as e:
+            flash(e, 'error')
+            return render_template('booking.html', club=club, competition=competition), 400
+
         club['points'] = int(club['points']) - places_required
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
         flash('Great-booking complete!', 'success')
